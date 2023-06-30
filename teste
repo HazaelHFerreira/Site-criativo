@@ -1,0 +1,90 @@
+import pygame
+import random
+
+# Inicialização do Pygame
+pygame.init()
+
+# Definição das cores
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+# Dimensões da tela
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+
+# Classe do jogador
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.Surface([50, 50])
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        # Movimento do jogador com as teclas de seta
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= 5
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += 5
+        if keys[pygame.K_UP]:
+            self.rect.y -= 5
+        if keys[pygame.K_DOWN]:
+            self.rect.y += 5
+
+# Classe do inimigo
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.Surface([30, 30])
+        self.image.fill((random.randint(50, 255), random.randint(50, 255), random.randint(50, 255)))
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randint(0, SCREEN_WIDTH - 30)
+        self.rect.y = random.randint(0, SCREEN_HEIGHT - 30)
+
+    def update(self):
+        # Movimento do inimigo
+        self.rect.y += 3
+        if self.rect.y > SCREEN_HEIGHT:
+            self.rect.y = random.randint(-100, -30)
+            self.rect.x = random.randint(0, SCREEN_WIDTH - 30)
+
+# Configuração da tela
+screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
+pygame.display.set_caption("Meu Jogo 2D")
+clock = pygame.time.Clock()
+
+all_sprites = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
+
+player = Player()
+all_sprites.add(player)
+
+# Geração de inimigos
+for _ in range(10):
+    enemy = Enemy()
+    all_sprites.add(enemy)
+    enemies.add(enemy)
+
+# Loop principal do jogo
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    all_sprites.update()
+
+    # Verifica colisão entre jogador e inimigo
+    if pygame.sprite.spritecollide(player, enemies, True):
+        print("Você perdeu!")
+
+    # Renderização
+    screen.fill(BLACK)
+    all_sprites.draw(screen)
+    pygame.display.flip()
+
+    clock.tick(60)
+
+# Encerra o jogo
+pygame.quit()
